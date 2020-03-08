@@ -35,7 +35,91 @@ public:
 
 	glm::mat4 Model = glm::mat4(1.0f);
 	
-	
+	glm::vec2 force = glm::vec2(0.0f,0.0f);
+	glm::vec2 acceleration = glm::vec2(0.0f, 0.0f);
+	glm::vec2 velocity = glm::vec2(0.0f, 0.0f);
+	glm::vec2 position = glm::vec2(0.0f, 0.0f);
+	float mass = 1;
+
+	bool left = false;
+
+	void col(Client client1, Client client2, float dt)
+	{
+		//if (position.x < client1.tx + 0.5f  && position.y < client1.ty + 0.5f && position.y > client1.ty - 0.5f /*&& !left*/)
+		if(glm::length(abs(position - glm::vec2(client1.tx, client1.ty))) < 0.75f)
+		{
+			//force += abs(velocity) / dt + abs(velocity) / dt ;
+			force += glm::normalize(position - glm::vec2(client1.tx, client1.ty)) * 1000.f;
+
+			//do the for of the vector from center of box to center of ball
+			left = true;
+			if (position.y < client1.ty - 0.1)
+				force.y += -50;
+			if (position.y > client1.ty + 0.1)
+				force.y += 50;
+		}
+		//else if (position.x > client2.tx - 0.5f && position.y < client2.ty + 0.5f && position.y > client2.ty - 0.5f /*&& left*/)
+		else if(glm::length(abs(position - glm::vec2(client2.tx, client2.ty))) < 0.75f)
+		{
+			//force += -abs(velocity) / dt - abs(velocity) / dt;
+			force += glm::normalize(position - glm::vec2(client2.tx, client2.ty)) * 1000.f;
+			left = false;
+			if (position.y < client2.ty - 0.1)
+				force.y += -50;
+			if (position.y > client2.ty + 0.1)
+				force.y += 50;
+		}
+		if (position.y > 3)
+		{
+			velocity.y = -abs(velocity.y);
+		}
+		if (position.y < -3)
+		{
+			velocity.y = abs(velocity.y);
+		}
+		if (position.x > 2 && (position.y > 1.0f || position.y < -1.0))
+		{
+			velocity.x = -abs(velocity.x);
+			left = false;
+		}
+		else if (position.x > 2)
+		{
+			velocity = glm::vec2(0.0f, 0.0f);
+			acceleration = glm::vec2(0.0f, 0.0f);
+			force = glm::vec2(0.0f, 0.0f);
+			position = glm::vec2(-0.7f, 0.0f);
+		}
+		if (position.x < -2 && (position.y > 1.0f || position.y < -1.0))
+		{
+			velocity.x = abs(velocity.x);
+			left = true;
+		}
+		else if (position.x < -2)
+		{
+			velocity = glm::vec2(0.0f, 0.0f);
+			acceleration = glm::vec2(0.0f, 0.0f);
+			force = glm::vec2(0.0f, 0.0f);
+			
+			position = glm::vec2(0.7f, 0.0f);
+			tx = 0;
+			ty = 0;
+		}
+	}
+
+	void update(float dt)
+	{
+		
+		acceleration = force / mass;
+		velocity = velocity + acceleration * dt;
+		if (glm::length(velocity) > 0)
+			velocity = glm::normalize(velocity) * 1.5f;
+		position = position + velocity * dt + 0.5f * acceleration * dt * dt;
+
+		tx = position.x;
+		ty = position.y;
+
+		force = glm::vec2(0.0f, 0.0f);
+	}
 
 
 private:
@@ -154,6 +238,8 @@ float tx = 0.0f;
 float ty = 0.0f;
 GLuint filter_mode = GL_LINEAR;
 
+
+float UPDATE_INTERVAL = 0.100;
 void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		ty += 0.001;
@@ -167,7 +253,13 @@ void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		tx -= 0.001;
 	}
-	
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+		UPDATE_INTERVAL += 0.01;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && UPDATE_INTERVAL > 0.09) {
+		UPDATE_INTERVAL -= 0.01;
+	}
+
 
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 		if (filter_mode == GL_LINEAR) {
@@ -192,7 +284,8 @@ SOCKET server_socket;
 struct addrinfo* ptr = NULL;
 #define PORT "8888"
 #define BUFLEN 512
-#define UPDATE_INTERVAL 0.100 //seconds
+//#define UPDATE_INTERVAL 0.100 //seconds
+
 
 bool initNetwork() {
 	//Initialize winsock
@@ -490,11 +583,14 @@ int main() {
 	// Timer variables for sending network updates
 	float time = 0.0;
 	float previous = glfwGetTime();
-	
+	ball.force += glm::vec2(-500, 0);
+
+	client1.tx = -1.5;
+	client2.tx = 1.5;
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		
+
 		////////////////////
 		/*
 		CODE TO RECEIVE UPDATES FROM CLIENT GOES HERE...
@@ -514,6 +610,14 @@ int main() {
 
 		keyboard();
 
+		/////// Timer for network updates
+		float now = glfwGetTime();
+		float delta = now - previous;
+		previous = now;
+
+		// When timer goes off, send an update
+		time -= delta;
+
 		struct sockaddr_in fromAddr;
 		int fromlen;
 		fromlen = sizeof(fromAddr);
@@ -521,11 +625,11 @@ int main() {
 		char buffer[BUFLEN];
 		memset(buffer, 0, BUFLEN);
 		if (recvfrom(server_socket, buffer, BUFLEN, 0,
-			(struct sockaddr*) &fromAddr, &fromlen) == SOCKET_ERROR)
+			(struct sockaddr*) & fromAddr, &fromlen) == SOCKET_ERROR)
 		{
 			//std::cout << "Cant sendto()...\n";
 		}
-		std::cout << "Recvfrom: "<< buffer << std::endl;
+		std::cout << "Recvfrom: " << buffer << std::endl;
 		std::string sbuffer = (std::string)buffer;
 
 		std::istringstream iss(sbuffer);
@@ -550,13 +654,13 @@ int main() {
 			if (clientID == 1)
 			{
 				client = &client1;
-				
+
 			}
-			else 
+			else
 			{
 				//std::cout << clientID <<std::endl;
 				client = &client2;
-				
+
 			}
 
 			std::getline(iss, tempBuffer);
@@ -567,55 +671,62 @@ int main() {
 			stringtofloat = std::stof(tempBuffer);
 			client->ty = stringtofloat;
 
-			
-			
 
-			
+
+
+
 		}
-
-		char message[BUFLEN];
-
-		std::string msg;
-		
-		msg = std::to_string(client2.tx);
-		msg += "\n";
-		msg += std::to_string(client2.ty);
-		msg += "\n";
-		msg += std::to_string(ball.tx);
-		msg += "\n";
-		msg += std::to_string(ball.ty);
-		strcpy(message, (char*)msg.c_str());
-
-		if (sendto(server_socket, message, BUFLEN, 0,
-			(sockaddr*)&client1.sockAddr, client1.addrlen) == SOCKET_ERROR)
+		if (time <= 0.f)
 		{
-			//std::cout << "Cant sendto()...\n";
-		}
-		std::cout << "Sent to Cliient1: " << message << std::endl;
-		memset(message, '\0', BUFLEN);
 
-		msg = std::to_string(client1.tx);
-		msg += "\n";
-		msg += std::to_string(client1.ty);
-		msg += "\n";
-		msg += std::to_string(ball.tx);
-		msg += "\n";
-		msg += std::to_string(ball.ty);
-		strcpy(message, (char*)msg.c_str());
+			char message[BUFLEN];
 
-		if (sendto(server_socket, message, BUFLEN, 0,
-			(sockaddr*)& client2.sockAddr, client2.addrlen) == SOCKET_ERROR)
-		{
-			//std::cout << "Cant sendto()...\n";
+			std::string msg;
+
+			msg = std::to_string(client2.tx);
+			msg += "\n";
+			msg += std::to_string(client2.ty);
+			msg += "\n";
+			msg += std::to_string(ball.tx);
+			msg += "\n";
+			msg += std::to_string(ball.ty);
+			strcpy(message, (char*)msg.c_str());
+
+			if (sendto(server_socket, message, BUFLEN, 0,
+				(sockaddr*)& client1.sockAddr, client1.addrlen) == SOCKET_ERROR)
+			{
+				//std::cout << "Cant sendto()...\n";
+			}
+			std::cout << "Sent to Cliient1: " << message << std::endl;
+			memset(message, '\0', BUFLEN);
+
+			msg = std::to_string(client1.tx);
+			msg += "\n";
+			msg += std::to_string(client1.ty);
+			msg += "\n";
+			msg += std::to_string(ball.tx);
+			msg += "\n";
+			msg += std::to_string(ball.ty);
+			strcpy(message, (char*)msg.c_str());
+
+			if (sendto(server_socket, message, BUFLEN, 0,
+				(sockaddr*)& client2.sockAddr, client2.addrlen) == SOCKET_ERROR)
+			{
+				//std::cout << "Cant sendto()...\n";
+			}
+			std::cout << "Sent to Client2: " << message << std::endl;
+			memset(message, '\0', BUFLEN);
+			time = UPDATE_INTERVAL; // reset the timer
 		}
-		std::cout << "Sent to Client2: " << message << std::endl;
-		memset(message, '\0', BUFLEN);
+
+		ball.col(client1, client2, delta);
+		ball.update(delta);
 
 		client1.Model = glm::translate(client1.Model, glm::vec3(client1.tx, client1.ty, -4.0f));
 		mvp = Projection * View * client1.Model;
 		glBindVertexArray(vao);
 
-		glUniformMatrix4fv(MatrixID, 1, 
+		glUniformMatrix4fv(MatrixID, 1,
 			GL_FALSE, &mvp[0][0]);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -115,6 +115,7 @@ float tx = 0.0f;
 float ty = 0.0f;
 GLuint filter_mode = GL_LINEAR;
 
+float UPDATE_INTERVAL = 0.100;
 void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		ty += 0.01;
@@ -127,6 +128,12 @@ void keyboard() {
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		tx -= 0.01;
+	}
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+		UPDATE_INTERVAL += 0.01;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && UPDATE_INTERVAL > 0.05) {
+		UPDATE_INTERVAL -= 0.01;
 	}
 	
 
@@ -154,7 +161,7 @@ struct addrinfo* ptr = NULL;
 #define SERVER "127.0.0.1"
 #define PORT "8888"
 #define BUFLEN 512
-#define UPDATE_INTERVAL 0.030 //seconds
+//#define UPDATE_INTERVAL 0.030 //seconds
 
 bool initNetwork(std::string ip) {
 	//Initialize winsock
@@ -177,7 +184,7 @@ bool initNetwork(std::string ip) {
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
 
-	if (getaddrinfo(ip.c_str(), PORT, &hints, &ptr) != 0) {
+	if (getaddrinfo("127.0.0.1", PORT, &hints, &ptr) != 0) {
 		printf("Getaddrinfo failed!! %d\n", WSAGetLastError());
 		WSACleanup();
 		return 0;
@@ -185,6 +192,9 @@ bool initNetwork(std::string ip) {
 
 	
 	client_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	/// Change to non-blocking mode
+	u_long mode = 1;// 0 for blocking mode
+	ioctlsocket(client_socket, FIONBIO, &mode);
 
 	if (client_socket == INVALID_SOCKET) {
 		printf("Failed creating a socket %d\n", WSAGetLastError());
@@ -203,7 +213,7 @@ int main() {
 	std::cout << "Enter the client ID(1 or 2): ";
 	std::cin >> clientID;
 	std::cout << "Enter the IP Adress: ";
-	std::cin >> IP;
+	//std::cin >> IP;
 
 	//Initialize GLFW
 	if (!initGLFW())
@@ -418,7 +428,17 @@ int main() {
 	glm::mat4 otherModel = glm::mat4(1.0f);
 	glm::mat4 ballModel = glm::mat4(1.0f);
 	// create individual matrices glm::mat4 T R and S, then multiply them
-	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
+	if (clientID == 1)
+	{
+		Model = glm::translate(Model, glm::vec3(-1.5f, 0.0f, 0.0f));
+		tx = -1.5f;
+	}
+	else
+	{
+		Model = glm::translate(Model, glm::vec3(1.5f, 0.0f, 0.0f));
+		tx = 1.5f;
+	}
+	
 	otherModel = glm::translate(otherModel, glm::vec3(0.0f, 0.0f, 0.0f));
 	ballModel = glm::translate(ballModel, glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -445,6 +465,10 @@ int main() {
 	// Timer variables for sending network updates
 	float time = 0.0;
 	float previous = glfwGetTime();
+	float otherx = 0;
+	float othery = 0;
+	float ballx = 0;
+	float bally = 0;
 	
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -492,10 +516,7 @@ int main() {
 
 		keyboard();
 
-		float otherx = 0;
-		float othery = 0;
-		float ballx = 0;
-		float bally = 0;
+		
 
 		struct sockaddr_in fromAddr;
 		int fromlen;
