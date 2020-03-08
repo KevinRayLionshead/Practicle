@@ -49,7 +49,7 @@ public:
 		if(glm::length(abs(position - glm::vec2(client1.tx, client1.ty))) < 0.75f)
 		{
 			//force += abs(velocity) / dt + abs(velocity) / dt ;
-			force += glm::normalize(position - glm::vec2(client1.tx, client1.ty)) * 1000.f;
+			force += glm::normalize(position - glm::vec2(client1.tx, client1.ty)) * 500.f;
 
 			//do the for of the vector from center of box to center of ball
 			left = true;
@@ -62,7 +62,7 @@ public:
 		else if(glm::length(abs(position - glm::vec2(client2.tx, client2.ty))) < 0.75f)
 		{
 			//force += -abs(velocity) / dt - abs(velocity) / dt;
-			force += glm::normalize(position - glm::vec2(client2.tx, client2.ty)) * 1000.f;
+			force += glm::normalize(position - glm::vec2(client2.tx, client2.ty)) * 500.f;
 			left = false;
 			if (position.y < client2.ty - 0.1)
 				force.y += -50;
@@ -77,24 +77,24 @@ public:
 		{
 			velocity.y = abs(velocity.y);
 		}
-		if (position.x > 2 && (position.y > 1.0f || position.y < -1.0))
+		if (position.x > 2.5 && (position.y > 1.0f || position.y < -1.0))
 		{
 			velocity.x = -abs(velocity.x);
 			left = false;
 		}
-		else if (position.x > 2)
+		else if (position.x > 2.5)
 		{
 			velocity = glm::vec2(0.0f, 0.0f);
 			acceleration = glm::vec2(0.0f, 0.0f);
 			force = glm::vec2(0.0f, 0.0f);
 			position = glm::vec2(-0.7f, 0.0f);
 		}
-		if (position.x < -2 && (position.y > 1.0f || position.y < -1.0))
+		if (position.x < -2.5 && (position.y > 1.0f || position.y < -1.0))
 		{
 			velocity.x = abs(velocity.x);
 			left = true;
 		}
-		else if (position.x < -2)
+		else if (position.x < -2.5)
 		{
 			velocity = glm::vec2(0.0f, 0.0f);
 			acceleration = glm::vec2(0.0f, 0.0f);

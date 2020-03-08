@@ -24,6 +24,7 @@ GLFWwindow* window;
 
 unsigned char* image;
 int width, height;
+int clientID;
 
 void loadImage() {
 	int channels;
@@ -123,10 +124,17 @@ void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		ty -= 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && clientID == 1 && tx < 0) {
 		tx += 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+	else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && clientID == 2)
+	{
+		tx += 0.01;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && clientID == 2 && tx > 0) {
+		tx -= 0.01;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && clientID == 1) {
 		tx -= 0.01;
 	}
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
@@ -208,7 +216,7 @@ bool initNetwork(std::string ip) {
 
 int main() {
 
-	int clientID;
+	
 	std::string IP;
 	std::cout << "Enter the client ID(1 or 2): ";
 	std::cin >> clientID;
