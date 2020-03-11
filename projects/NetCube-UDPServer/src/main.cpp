@@ -1,3 +1,5 @@
+//Kevin Lounsbury 100654226
+//Dimitrios Stefanakos 100621470
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
