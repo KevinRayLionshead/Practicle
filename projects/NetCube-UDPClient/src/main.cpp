@@ -116,6 +116,75 @@ float tx = 0.0f;
 float ty = 0.0f;
 GLuint filter_mode = GL_LINEAR;
 
+
+class Ball
+{
+public:
+	
+	float x = 0.f;
+	float y = 0.f;
+
+	glm::mat4 Model = glm::mat4(1.0f);
+
+	glm::vec2 force = glm::vec2(0.0f, 0.0f);
+	glm::vec2 acceleration = glm::vec2(0.0f, 0.0f);
+	glm::vec2 velocity = glm::vec2(0.0f, 0.0f);
+	glm::vec2 position = glm::vec2(0.0f, 0.0f);
+	float mass = 1;
+
+	void col()
+	{
+		if (position.x > 2.5 && (position.y > 1.0f || position.y < -1.0))
+		{
+			velocity.x = -abs(velocity.x);
+			
+		}
+		else if (position.x > 2.5)
+		{
+			velocity = glm::vec2(0.0f, 0.0f);
+			acceleration = glm::vec2(0.0f, 0.0f);
+			force = glm::vec2(0.0f, 0.0f);
+			position = glm::vec2(-0.7f, 0.0f);
+		}
+		if (position.x < -2.5 && (position.y > 1.0f || position.y < -1.0))
+		{
+			velocity.x = abs(velocity.x);
+			
+		}
+		else if (position.x < -2.5)
+		{
+			velocity = glm::vec2(0.0f, 0.0f);
+			acceleration = glm::vec2(0.0f, 0.0f);
+			force = glm::vec2(0.0f, 0.0f);
+
+			position = glm::vec2(0.7f, 0.0f);
+		}
+	}
+
+	void update(float dt)
+	{
+
+		acceleration = force / mass;
+		velocity = velocity + acceleration * dt;
+		if (glm::length(velocity) > 0)
+			velocity = glm::normalize(velocity) * 1.5f;
+		position = position + velocity * dt + 0.5f * acceleration * dt * dt;
+
+		x = position.x;
+		y = position.y;
+
+		force = glm::vec2(0.0f, 0.0f);
+	}
+
+private:
+
+};
+
+
+
+
+
+
 float UPDATE_INTERVAL = 0.100;
 void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -222,6 +291,21 @@ int main() {
 	std::cin >> clientID;
 	std::cout << "Enter the IP Adress: ";
 	//std::cin >> IP;
+	Ball ball;
+
+	float score1tx = 0.f;
+	float score1ty = 0.f;
+	float score2tx = 0.f;
+	float score2ty = 0.f;
+	float score3tx = 0.f;
+	float score3ty = 0.f;
+	float score4tx = 0.f;
+	float score4ty = 0.f;
+	float score5tx = 0.f;
+	float score5ty = 0.f;
+	float score6tx = 0.f;
+	float score6ty = 0.f;
+
 
 	//Initialize GLFW
 	if (!initGLFW())
@@ -434,7 +518,15 @@ int main() {
 	// Model matrix : an identity matrix (model will be at the origin)
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 otherModel = glm::mat4(1.0f);
-	glm::mat4 ballModel = glm::mat4(1.0f);
+	//glm::mat4 ballModel = glm::mat4(1.0f);
+	ball.Model = glm::mat4(1.0f);
+
+	glm::mat4 Model1 = glm::mat4(1.0f);
+	glm::mat4 Model2 = glm::mat4(1.0f);
+	glm::mat4 Model3 = glm::mat4(1.0f);
+	glm::mat4 Model4 = glm::mat4(1.0f);
+	glm::mat4 Model5 = glm::mat4(1.0f);
+	glm::mat4 Model6 = glm::mat4(1.0f);
 	// create individual matrices glm::mat4 T R and S, then multiply them
 	if (clientID == 1)
 	{
@@ -448,7 +540,7 @@ int main() {
 	}
 	
 	otherModel = glm::translate(otherModel, glm::vec3(0.0f, 0.0f, 0.0f));
-	ballModel = glm::translate(ballModel, glm::vec3(0.0f, 0.0f, 0.0f));
+	ball.Model = glm::translate(ball.Model, glm::vec3(0.0f, 0.0f, 0.0f));
 
 
 	// Our ModelViewProjection : multiplication of our 3 matrices
@@ -520,7 +612,13 @@ int main() {
 
 		Model = glm::mat4(1.0f);
 		otherModel = glm::mat4(1.0f);
-		ballModel = glm::mat4(1.0f);
+		ball.Model = glm::mat4(1.0f);
+		Model1 = glm::mat4(1.0f);
+		Model2 = glm::mat4(1.0f);
+		Model3 = glm::mat4(1.0f);
+		Model4 = glm::mat4(1.0f);
+		Model5 = glm::mat4(1.0f);
+		Model6 = glm::mat4(1.0f);
 
 		keyboard();
 
@@ -553,6 +651,36 @@ int main() {
 			std::getline(iss, temp);
 			bally = std::stof(temp);
 
+			std::getline(iss, temp);
+			score1tx = std::stof(temp);
+			std::getline(iss, temp);
+			score1ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			score2tx = std::stof(temp);
+			std::getline(iss, temp);
+			score2ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			score3tx = std::stof(temp);
+			std::getline(iss, temp);
+			score3ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			score4tx = std::stof(temp);
+			std::getline(iss, temp);
+			score4ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			score5tx = std::stof(temp);
+			std::getline(iss, temp);
+			score5ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			score6tx = std::stof(temp);
+			std::getline(iss, temp);
+			score6ty = std::stof(temp);
+
 		}
 		Model = glm::translate(Model, glm::vec3(tx, ty, -4.0f));
 		mvp = Projection * View * Model;
@@ -573,11 +701,73 @@ int main() {
 			GL_FALSE, &mvp[0][0]);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+		ball.col();
+		ball.update(delta);
 
-		ballModel = glm::translate(ballModel, glm::vec3(ballx, bally, -4.0f));
-		ballModel = glm::scale(ballModel, glm::vec3(0.5f, 0.5f, 0.5f));
-		mvp = Projection * View * ballModel;
+		ball.Model = glm::translate(ball.Model, glm::vec3(ballx, bally, -4.0f));
+		ball.Model = glm::scale(ball.Model, glm::vec3(0.5f, 0.5f, 0.5f));
+		mvp = Projection * View * ball.Model;
 
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model1 = glm::translate(Model1, glm::vec3(score1tx, score1ty, -4.0f));
+		Model1 = glm::scale(Model1, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model1;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model2 = glm::translate(Model2, glm::vec3(score2tx, score2ty, -4.0f));
+		Model2 = glm::scale(Model2, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model2;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model3 = glm::translate(Model3, glm::vec3(score3tx, score3ty, -4.0f));
+		Model3 = glm::scale(Model3, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model3;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model4 = glm::translate(Model4, glm::vec3(score4tx, score4ty, -4.0f));
+		Model4 = glm::scale(Model4, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model4;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model5 = glm::translate(Model5, glm::vec3(score5tx, score5ty, -4.0f));
+		Model5 = glm::scale(Model5, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model5;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Model6 = glm::translate(Model6, glm::vec3(score6tx, score6ty, -4.0f));
+		Model6 = glm::scale(Model6, glm::vec3(0.1f, 0.1f, 0.1f));
+		mvp = Projection * View * Model6;
 		glBindVertexArray(vao);
 
 		glUniformMatrix4fv(MatrixID, 1,

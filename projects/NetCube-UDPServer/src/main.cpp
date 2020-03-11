@@ -28,6 +28,9 @@ public:
 	float tx;
 	float ty;
 
+	int score1 = 0;
+	int score2 = 0;
+
 	struct sockaddr_in sockAddr;
 	int addrlen = sizeof(sockAddr);
 
@@ -88,6 +91,9 @@ public:
 			acceleration = glm::vec2(0.0f, 0.0f);
 			force = glm::vec2(0.0f, 0.0f);
 			position = glm::vec2(-0.7f, 0.0f);
+			score1++;
+			if (score1 > 3)
+				exit(0);
 		}
 		if (position.x < -2.5 && (position.y > 1.0f || position.y < -1.0))
 		{
@@ -101,8 +107,9 @@ public:
 			force = glm::vec2(0.0f, 0.0f);
 			
 			position = glm::vec2(0.7f, 0.0f);
-			tx = 0;
-			ty = 0;
+			score2++;
+			if (score2 > 3)
+				exit(0);
 		}
 	}
 
@@ -349,6 +356,7 @@ int main() {
 	Client client1;
 	Client client2;
 	Client ball;
+	Client score1, score2, score3, score4, score5, score6;
 	//Initialize GLFW
 	if (!initGLFW())
 		return 1;
@@ -583,10 +591,37 @@ int main() {
 	// Timer variables for sending network updates
 	float time = 0.0;
 	float previous = glfwGetTime();
-	ball.force += glm::vec2(-500, 0);
+	//ball.force += glm::vec2(-500, 0);
 
 	client1.tx = -1.5;
 	client2.tx = 1.5;
+
+	float score1tx = -1.5f;
+	float score1ty = 2;
+	float score2tx = -1.7f;
+	float score2ty = 2;
+	float score3tx = -1.9f;
+	float score3ty = 2;
+	float score4tx = 1.5f;
+	float score4ty = 2;
+	float score5tx = 1.7f;
+	float score5ty = 2;
+	float score6tx = 1.9f;
+	float score6ty = 2;
+
+	score1.tx = 0;
+	score1.ty = 8;
+	score2.tx = 0;
+	score2.ty = 8;
+	score3.tx = 0;
+	score3.ty = 8;
+	score4.tx = 0;
+	score4.ty = 8;
+	score5.tx = 0;
+	score5.ty = 8;
+	score6.tx = 0;
+	score6.ty = 8;
+	
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -607,6 +642,27 @@ int main() {
 		client1.Model = glm::mat4(1.0f);
 		client2.Model = glm::mat4(1.0f);
 		ball.Model = glm::mat4(1.0f);
+		score1.Model = glm::mat4(1.0f);
+		score2.Model = glm::mat4(1.0f);
+		score3.Model = glm::mat4(1.0f);
+		score4.Model = glm::mat4(1.0f);
+		score5.Model = glm::mat4(1.0f);
+		score6.Model = glm::mat4(1.0f);
+
+		
+
+		score1.Model = glm::translate(score1.Model, glm::vec3(score1.tx, score1.ty, -4.0f));
+		score1.Model = glm::scale(score1.Model, glm::vec3(0.1f, 0.1f, 0.1f));
+		score2.Model = glm::translate(score2.Model, glm::vec3(score2.tx, score2.ty, -4.0f));
+		score2.Model = glm::scale(score2.Model, glm::vec3(0.1f, 0.1f, 0.1f));
+		score3.Model = glm::translate(score3.Model, glm::vec3(score3.tx, score3.ty, -4.0f));
+		score3.Model = glm::scale(score3.Model, glm::vec3(0.1f, 0.1f, 0.1f));
+		score4.Model = glm::translate(score4.Model, glm::vec3(score4.tx, score4.ty, -4.0f));
+		score4.Model = glm::scale(score4.Model, glm::vec3(0.1f, 0.1f, 0.1f));
+		score5.Model = glm::translate(score5.Model, glm::vec3(score5.tx, score5.ty, -4.0f));
+		score5.Model = glm::scale(score5.Model, glm::vec3(0.1f, 0.1f, 0.1f));
+		score6.Model = glm::translate(score6.Model, glm::vec3(score6.tx, score6.ty, -4.0f));
+		score6.Model = glm::scale(score6.Model, glm::vec3(0.1f, 0.1f, 0.1f));
 
 		keyboard();
 
@@ -690,6 +746,31 @@ int main() {
 			msg += std::to_string(ball.tx);
 			msg += "\n";
 			msg += std::to_string(ball.ty);
+			msg += "\n";
+			msg += std::to_string(score1.tx);
+			msg += "\n";
+			msg += std::to_string(score1.ty);
+			msg += "\n";
+			msg += std::to_string(score2.tx);
+			msg += "\n";
+			msg += std::to_string(score2.ty);
+			msg += "\n";
+			msg += std::to_string(score3.tx);
+			msg += "\n";
+			msg += std::to_string(score3.ty);
+			msg += "\n";
+			msg += std::to_string(score4.tx);
+			msg += "\n";
+			msg += std::to_string(score4.ty);
+			msg += "\n";
+			msg += std::to_string(score5.tx);
+			msg += "\n";
+			msg += std::to_string(score5.ty);
+			msg += "\n";
+			msg += std::to_string(score6.tx);
+			msg += "\n";
+			msg += std::to_string(score6.ty);
+			
 			strcpy(message, (char*)msg.c_str());
 
 			if (sendto(server_socket, message, BUFLEN, 0,
@@ -707,6 +788,30 @@ int main() {
 			msg += std::to_string(ball.tx);
 			msg += "\n";
 			msg += std::to_string(ball.ty);
+			msg += "\n";
+			msg += std::to_string(score1.tx);
+			msg += "\n";
+			msg += std::to_string(score1.ty);
+			msg += "\n";
+			msg += std::to_string(score2.tx);
+			msg += "\n";
+			msg += std::to_string(score2.ty);
+			msg += "\n";
+			msg += std::to_string(score3.tx);
+			msg += "\n";
+			msg += std::to_string(score3.ty);
+			msg += "\n";
+			msg += std::to_string(score4.tx);
+			msg += "\n";
+			msg += std::to_string(score4.ty);
+			msg += "\n";
+			msg += std::to_string(score5.tx);
+			msg += "\n";
+			msg += std::to_string(score5.ty);
+			msg += "\n";
+			msg += std::to_string(score6.tx);
+			msg += "\n";
+			msg += std::to_string(score6.ty);
 			strcpy(message, (char*)msg.c_str());
 
 			if (sendto(server_socket, message, BUFLEN, 0,
@@ -721,6 +826,32 @@ int main() {
 
 		ball.col(client1, client2, delta);
 		ball.update(delta);
+
+		if (ball.score1 == 1) {
+			score1.tx = score1tx;
+			score1.ty = score1ty;
+		}
+		else if (ball.score1 == 2) {
+			score2.tx = score2tx;
+			score2.ty = score2ty;
+		}
+		else if (ball.score1 == 2) {
+			score3.tx = score3tx;
+			score3.ty = score3ty;
+		}
+		
+		if (ball.score2 == 1) {
+			score4.tx = score4tx;
+			score4.ty = score4ty;
+		}
+		else if (ball.score2 == 2) {
+			score5.tx = score5tx;
+			score5.ty = score5ty;
+		}
+		else if (ball.score2 == 3) {
+			score6.tx = score6tx;
+			score6.ty = score6ty;
+		}
 
 		client1.Model = glm::translate(client1.Model, glm::vec3(client1.tx, client1.ty, -4.0f));
 		mvp = Projection * View * client1.Model;
@@ -754,6 +885,64 @@ int main() {
 			GL_FALSE, &mvp[0][0]);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+
+
+		score1.Model = glm::translate(score1.Model, glm::vec3(score1.tx, score1.ty, -4.0f));
+		mvp = Projection * View * score1.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		score2.Model = glm::translate(score2.Model, glm::vec3(score2.tx, score2.ty, -4.0f));
+		mvp = Projection * View * score2.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		score3.Model = glm::translate(score3.Model, glm::vec3(score3.tx, score3.ty, -4.0f));
+		mvp = Projection * View * score3.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		score4.Model = glm::translate(score4.Model, glm::vec3(score4.tx, score4.ty, -4.0f));
+		mvp = Projection * View * score4.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		score5.Model = glm::translate(score5.Model, glm::vec3(score5.tx, score5.ty, -4.0f));
+		mvp = Projection * View * score5.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		score6.Model = glm::translate(score6.Model, glm::vec3(score6.tx, score6.ty, -4.0f));
+		mvp = Projection * View * score6.Model;
+		glBindVertexArray(vao);
+
+		glUniformMatrix4fv(MatrixID, 1,
+			GL_FALSE, &mvp[0][0]);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
 		glfwSwapBuffers(window);
 	}
