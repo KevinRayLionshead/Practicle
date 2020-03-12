@@ -264,7 +264,7 @@ bool initNetwork(std::string ip) {
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
 
-	if (getaddrinfo("127.0.0.1", PORT, &hints, &ptr) != 0) {
+	if (getaddrinfo(ip.c_str(), PORT, &hints, &ptr) != 0) {
 		printf("Getaddrinfo failed!! %d\n", WSAGetLastError());
 		WSACleanup();
 		return 0;
@@ -293,7 +293,7 @@ int main() {
 	std::cout << "Enter the client ID(1 or 2): ";
 	std::cin >> clientID;
 	std::cout << "Enter the IP Adress: ";
-	//std::cin >> IP;
+	std::cin >> IP;
 	Ball ball;
 
 	float score1tx = 0.f;
