@@ -30,6 +30,12 @@ public:
 	float tx;
 	float ty;
 
+	float prevtx;
+	float prevty;
+
+	bool dead = true;
+	glm::vec2 newPos;
+
 	int score1 = 0;
 	int score2 = 0;
 
@@ -130,6 +136,26 @@ public:
 		force = glm::vec2(0.0f, 0.0f);
 	}
 
+	void UpdateClient(float dt)
+	{
+		
+		if (tx != prevtx || ty != prevty)
+		{
+
+			newPos = glm::vec2(tx, ty) - glm::vec2(prevtx, prevty);
+			newPos /= 0.1f;
+
+			glm::vec2 newPosition = glm::vec2(tx, ty) + newPos * dt;
+
+			prevtx = tx;
+			prevty = ty;
+
+			tx = newPosition.x;
+			ty = newPosition.y;
+
+
+		}
+	}
 
 private:
 
@@ -139,6 +165,9 @@ Client::Client()
 {
 	tx = 0;
 	ty = 0;
+
+	prevtx = 0;
+	prevty = 0;
 
 	Model = glm::translate(Model, glm::vec3(tx, ty, 0.0f));
 	//sockAddr = fromAddr;
@@ -192,6 +221,7 @@ bool initGLAD() {
 		std::cout << "Failed to initialize Glad" << std::endl;
 		return false;
 	}
+	return true;
 }
 
 
@@ -249,6 +279,8 @@ GLuint filter_mode = GL_LINEAR;
 
 
 float UPDATE_INTERVAL = 0.100;
+
+
 void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		ty += 0.001;
@@ -262,10 +294,10 @@ void keyboard() {
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		tx -= 0.001;
 	}
-	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		UPDATE_INTERVAL += 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && UPDATE_INTERVAL > 0.09) {
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS && UPDATE_INTERVAL > 0.09) {
 		UPDATE_INTERVAL -= 0.01;
 	}
 
@@ -365,7 +397,7 @@ int main() {
 
 	//Initialize GLAD
 	if (!initGLAD())
-		return 1;
+		return 20;
 
 	//Initialize Network
 	if (!initNetwork())
@@ -595,8 +627,11 @@ int main() {
 	float previous = glfwGetTime();
 	//ball.force += glm::vec2(-500, 0);
 
-	client1.tx = -1.5;
-	client2.tx = 1.5;
+	client1.tx = -1.500000f;
+	client2.tx = 1.500000f;
+
+	client1.prevtx = -1.500000f;
+	client2.prevtx = 1.500000f;
 
 	float score1tx = -1.5f;
 	float score1ty = 2;
@@ -723,15 +758,14 @@ int main() {
 
 			std::getline(iss, tempBuffer);
 			float stringtofloat = std::stof(tempBuffer);
+			//client->prevtx = client->tx;
 			client->tx = stringtofloat;
+			client->dead = true;
 
 			std::getline(iss, tempBuffer);
 			stringtofloat = std::stof(tempBuffer);
+			//client->prevty = client->ty;
 			client->ty = stringtofloat;
-
-
-
-
 
 		}
 		if (time <= 0.f)
@@ -828,6 +862,9 @@ int main() {
 
 		ball.col(client1, client2, delta);
 		ball.update(delta);
+
+		client1.UpdateClient(delta);
+		client2.UpdateClient(delta);
 
 		if (ball.score1 == 1) {
 			score1.tx = score1tx;

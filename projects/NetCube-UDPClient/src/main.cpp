@@ -183,7 +183,25 @@ private:
 
 };
 
+void DeadRec(float& x, float& y, float &prevx, float &prevy, float dt)
+{
+	if (x != prevx || y != prevy)
+	{
+		if (true) {
+			glm::vec2 newPos = glm::vec2(x, y) - glm::vec2(prevx, prevy);
+			newPos /= 0.1f;
 
+			glm::vec2 newPosition = glm::vec2(x, y) + newPos * dt /** 20.f*/;
+
+			prevx = x;
+			prevy = y;
+
+			x = newPosition.x;
+			y = newPosition.y;
+			
+		}
+	}
+}
 
 
 
@@ -209,10 +227,10 @@ void keyboard() {
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && clientID == 1) {
 		tx -= 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		UPDATE_INTERVAL += 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && UPDATE_INTERVAL > 0.05) {
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS && UPDATE_INTERVAL > 0.05) {
 		UPDATE_INTERVAL -= 0.01;
 	}
 	
@@ -569,9 +587,13 @@ int main() {
 	float time = 0.0;
 	float previous = glfwGetTime();
 	float otherx = 0;
+	float otherprevx = 0;
 	float othery = 0;
+	float otherprevy = 0;
 	float ballx = 0;
+	float ballprevx = 0;
 	float bally = 0;
+	float ballprevy = 0;
 	
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -685,6 +707,11 @@ int main() {
 			score6ty = std::stof(temp);
 
 		}
+
+
+		DeadRec(otherx, othery, otherprevx, otherprevy, delta);
+		DeadRec(ballx, bally, ballprevx, ballprevy, delta);
+
 		Model = glm::translate(Model, glm::vec3(tx, ty, -4.0f));
 		mvp = Projection * View * Model;
 
