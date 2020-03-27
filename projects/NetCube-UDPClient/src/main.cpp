@@ -117,6 +117,7 @@ bool loadShaders() {
 //INPUT handling
 float tx = 0.0f;
 float ty = 0.0f;
+float updadteInterval = 0.100f;
 GLuint filter_mode = GL_LINEAR;
 
 
@@ -189,7 +190,7 @@ void DeadRec(float& x, float& y, float &prevx, float &prevy, float dt)
 	{
 		if (true) {
 			glm::vec2 newPos = glm::vec2(x, y) - glm::vec2(prevx, prevy);
-			newPos /= 0.1f;
+			newPos /= updadteInterval;
 
 			glm::vec2 newPosition = glm::vec2(x, y) + newPos * dt /** 20.f*/;
 
@@ -617,6 +618,8 @@ int main() {
 			msg += std::to_string(tx);
 			msg += "\n";
 			msg += std::to_string(ty);
+			msg += "\n";
+			msg += std::to_string(UPDATE_INTERVAL);
 			strcpy(message, (char*)msg.c_str());
 
 			if (sendto(client_socket, message, BUFLEN, 0, 
@@ -705,6 +708,9 @@ int main() {
 			score6tx = std::stof(temp);
 			std::getline(iss, temp);
 			score6ty = std::stof(temp);
+
+			std::getline(iss, temp);
+			updadteInterval = std::stof(temp);
 
 		}
 

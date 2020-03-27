@@ -33,6 +33,8 @@ public:
 	float prevtx;
 	float prevty;
 
+	float updateInterval = 0.100f;
+
 	bool dead = true;
 	glm::vec2 newPos;
 
@@ -143,7 +145,7 @@ public:
 		{
 
 			newPos = glm::vec2(tx, ty) - glm::vec2(prevtx, prevty);
-			newPos /= 0.1f;
+			newPos /= updateInterval;
 
 			glm::vec2 newPosition = glm::vec2(tx, ty) + newPos * dt;
 
@@ -767,6 +769,10 @@ int main() {
 			//client->prevty = client->ty;
 			client->ty = stringtofloat;
 
+			std::getline(iss, tempBuffer);
+			stringtofloat = std::stof(tempBuffer);
+			client->updateInterval = stringtofloat;
+
 		}
 		if (time <= 0.f)
 		{
@@ -806,6 +812,8 @@ int main() {
 			msg += std::to_string(score6.tx);
 			msg += "\n";
 			msg += std::to_string(score6.ty);
+			msg += "\n";
+			msg += std::to_string(UPDATE_INTERVAL);
 			
 			strcpy(message, (char*)msg.c_str());
 
@@ -848,6 +856,8 @@ int main() {
 			msg += std::to_string(score6.tx);
 			msg += "\n";
 			msg += std::to_string(score6.ty);
+			msg += "\n";
+			msg += std::to_string(UPDATE_INTERVAL);
 			strcpy(message, (char*)msg.c_str());
 
 			if (sendto(server_socket, message, BUFLEN, 0,
